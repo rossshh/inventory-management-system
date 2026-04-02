@@ -7,6 +7,6 @@ namespace ims.Services.Interfaces;
 public interface IAuthService
 {
     Task<AuthResponseDto> AuthenticateAsync(LoginDto login);
-    Task<User> RegisterAsync(RegisterDto registerDto);
+    Task<UserDto> RegisterAsync(RegisterDto registerDto);
     Task SeedDefaultAdminAsync();
 }

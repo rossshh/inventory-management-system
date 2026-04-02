@@ -51,13 +51,7 @@ public class OrderRepository : IOrderRepository
 
     public async Task<IEnumerable<SupplierOrderReportDto>> GetSupplierOrderReportAsync()
     {
-        var sql = @"
-            SELECT s.Name AS Supplier, SUM(o.Quantity) AS TotalQuantity, SUM(o.Quantity * p.Price) AS TotalValue
-            FROM Orders o
-            JOIN Products p ON o.ProductId = p.Id
-            JOIN Suppliers s ON o.SupplierId = s.Id
-            GROUP BY s.Name";
-
-        return await _context.Database.SqlQueryRaw<SupplierOrderReportDto>(sql).ToListAsync();
+        // Calling the stored procedure mandated by the requirement document
+        return await _context.Database.SqlQueryRaw<SupplierOrderReportDto>("EXEC GetSupplierOrderReport").ToListAsync();
     }
 }

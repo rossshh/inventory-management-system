@@ -50,7 +50,7 @@ public class AuthService : IAuthService
         };
     }
 
-    public async Task<User> RegisterAsync(RegisterDto registerDto)
+    public async Task<UserDto> RegisterAsync(RegisterDto registerDto)
     {
         var exists = await _userRepository.ExistsByUserNameAsync(registerDto.UserName);
         if (exists)
@@ -66,7 +66,12 @@ public class AuthService : IAuthService
 
         await _userRepository.AddAsync(user);
 
-        return user;
+        return new UserDto
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            Role = user.Role
+        };
     }
 
     public async Task SeedDefaultAdminAsync()

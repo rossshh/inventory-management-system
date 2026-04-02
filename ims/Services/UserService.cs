@@ -3,7 +3,7 @@ using ims.Models;
 using ims.Repository.Interfaces;
 using ims.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
-using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ims.Services;
@@ -19,17 +19,31 @@ public class UserService : IUserService
         _passwordHasher = new PasswordHasher<User>();
     }
 
-    public async Task<IEnumerable<User>> GetAllAsync()
+    public async Task<IEnumerable<UserDto>> GetAllAsync()
     {
-        return await _userRepository.GetAllAsync();
+        var users = await _userRepository.GetAllAsync();
+        return users.Select(u => new UserDto
+        {
+            Id = u.Id,
+            UserName = u.UserName,
+            Role = u.Role
+        });
     }
 
-    public async Task<User?> GetByIdAsync(int id)
+    public async Task<UserDto?> GetByIdAsync(int id)
     {
-        return await _userRepository.GetByIdAsync(id);
+        var u = await _userRepository.GetByIdAsync(id);
+        if (u == null) return null;
+
+        return new UserDto
+        {
+            Id = u.Id,
+            UserName = u.UserName,
+            Role = u.Role
+        };
     }
 
-    public async Task<User?> CreateAsync(RegisterDto registerDto)
+    public async Task<UserDto?> CreateAsync(RegisterDto registerDto)
     {
         var exists = await _userRepository.ExistsByUserNameAsync(registerDto.UserName);
         if (exists) return null;
@@ -42,7 +56,13 @@ public class UserService : IUserService
 
         user.PasswordHash = _passwordHasher.HashPassword(user, registerDto.Password);
         await _userRepository.AddAsync(user);
-        return user;
+
+        return new UserDto
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            Role = user.Role
+        };
     }
 
     public async Task UpdateAsync(int id, UserUpdateDto updateDto)

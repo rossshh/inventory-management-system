@@ -1,5 +1,5 @@
-using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace ims.Models;
 
@@ -12,7 +12,8 @@ public class User
     public string UserName { get; set; }
 
     [Required]
-    public string PasswordHash { get; set; }
+    [JsonIgnore]
+    public string PasswordHash { get; set; } = string.Empty;
 
     [Required]
     public UserRole Role { get; set; }
