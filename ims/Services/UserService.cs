@@ -1,9 +1,10 @@
+using AutoMapper;
 using ims.DTO;
 using ims.Models;
 using ims.Repository.Interfaces;
 using ims.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
-using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ims.Services;
@@ -11,36 +12,26 @@ namespace ims.Services;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IMapper _mapper;
     private readonly PasswordHasher<User> _passwordHasher;
 
-    public UserService(IUserRepository userRepository)
+    public UserService(IUserRepository userRepository, IMapper mapper)
     {
         _userRepository = userRepository;
+        _mapper = mapper;
         _passwordHasher = new PasswordHasher<User>();
     }
 
     public async Task<IEnumerable<UserDto>> GetAllAsync()
     {
         var users = await _userRepository.GetAllAsync();
-        return users.Select(u => new UserDto
-        {
-            Id = u.Id,
-            UserName = u.UserName,
-            Role = u.Role
-        });
+        return _mapper.Map<IEnumerable<UserDto>>(users);
     }
 
     public async Task<UserDto?> GetByIdAsync(int id)
     {
-        var u = await _userRepository.GetByIdAsync(id);
-        if (u == null) return null;
-
-        return new UserDto
-        {
-            Id = u.Id,
-            UserName = u.UserName,
-            Role = u.Role
-        };
+        var user = await _userRepository.GetByIdAsync(id);
+        return _mapper.Map<UserDto?>(user);
     }
 
     public async Task<UserDto?> CreateAsync(RegisterDto registerDto)
@@ -48,21 +39,12 @@ public class UserService : IUserService
         var exists = await _userRepository.ExistsByUserNameAsync(registerDto.UserName);
         if (exists) return null;
 
-        var user = new User
-        {
-            UserName = registerDto.UserName,
-            Role = registerDto.Role
-        };
-
+        var user = _mapper.Map<User>(registerDto);
         user.PasswordHash = _passwordHasher.HashPassword(user, registerDto.Password);
+        
         await _userRepository.AddAsync(user);
 
-        return new UserDto
-        {
-            Id = user.Id,
-            UserName = user.UserName,
-            Role = user.Role
-        };
+        return _mapper.Map<UserDto>(user);
     }
 
     public async Task UpdateAsync(int id, UserUpdateDto updateDto)
@@ -70,14 +52,10 @@ public class UserService : IUserService
         var user = await _userRepository.GetByIdAsync(id);
         if (user == null) return;
 
-        if (!string.IsNullOrEmpty(updateDto.UserName))
-            user.UserName = updateDto.UserName;
+        _mapper.Map(updateDto, user);
 
         if (!string.IsNullOrEmpty(updateDto.Password))
             user.PasswordHash = _passwordHasher.HashPassword(user, updateDto.Password);
-
-        if (updateDto.Role.HasValue)
-            user.Role = updateDto.Role.Value;
 
         await _userRepository.UpdateAsync(user);
     }

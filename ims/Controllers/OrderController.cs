@@ -1,4 +1,4 @@
-using ims.Models;
+using ims.DTO;
 using ims.Services.Interfaces;
 using ims.Helpers;
 using Microsoft.AspNetCore.Authorization;
@@ -29,7 +29,7 @@ public class OrderController : ControllerBase
     /// <response code="403">If the caller does not have the required role.</response>
     [HttpGet]
     [Authorize(Roles = "Staff,Manager,Admin")]
-    [ProducesResponseType(typeof(IEnumerable<Order>), 200)]
+    [ProducesResponseType(typeof(IEnumerable<OrderDto>), 200)]
     [ProducesResponseType(typeof(ErrorResponse), 401)]
     [ProducesResponseType(typeof(ErrorResponse), 403)]
     public async Task<IActionResult> GetAll()
@@ -49,7 +49,7 @@ public class OrderController : ControllerBase
     /// <response code="403">If the caller does not have the required role.</response>
     [HttpGet("{id}")]
     [Authorize(Roles = "Staff,Manager,Admin")]
-    [ProducesResponseType(typeof(Order), 200)]
+    [ProducesResponseType(typeof(OrderDto), 200)]
     [ProducesResponseType(typeof(ErrorResponse), 404)]
     [ProducesResponseType(typeof(ErrorResponse), 401)]
     [ProducesResponseType(typeof(ErrorResponse), 403)]
@@ -63,44 +63,44 @@ public class OrderController : ControllerBase
     /// <summary>
     /// Creates a new order (Staff only).
     /// </summary>
-    /// <param name="order">The details of the order to create.</param>
+    /// <param name="orderDto">The details of the order to create.</param>
     /// <returns>The created order details.</returns>
     /// <response code="201">Returns the newly created order.</response>
     /// <response code="401">If the caller is not authenticated.</response>
     /// <response code="403">If the caller is not Staff.</response>
     [HttpPost]
     [Authorize(Roles = "Staff")]
-    [ProducesResponseType(typeof(Order), 201)]
+    [ProducesResponseType(typeof(OrderDto), 201)]
     [ProducesResponseType(typeof(ErrorResponse), 401)]
     [ProducesResponseType(typeof(ErrorResponse), 403)]
-    public async Task<IActionResult> Create([FromBody] Order order)
+    public async Task<IActionResult> Create([FromBody] OrderCreateDto orderDto)
     {
-        await _orderService.AddAsync(order);
-        return CreatedAtAction(nameof(GetById), new { id = order.Id }, order);
+        var createdOrder = await _orderService.AddAsync(orderDto);
+        return CreatedAtAction(nameof(GetById), new { id = createdOrder.Id }, createdOrder);
     }
 
     /// <summary>
     /// Updates an existing order (Manager/Admin only).
     /// </summary>
     /// <param name="id">The ID of the order to update.</param>
-    /// <param name="order">The updated order information.</param>
+    /// <param name="orderDto">The updated order information.</param>
     /// <returns>No content on success.</returns>
     /// <response code="204">If the update was successful.</response>
-    /// <response code="400">If the ID in the URL does not match the ID in the body.</response>
     /// <response code="404">If the order is not found.</response>
     /// <response code="401">If the caller is not authenticated.</response>
     /// <response code="403">If the caller does not have Manager or Admin roles.</response>
     [HttpPut("{id}")]
     [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(204)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
     [ProducesResponseType(typeof(ErrorResponse), 404)]
     [ProducesResponseType(typeof(ErrorResponse), 401)]
     [ProducesResponseType(typeof(ErrorResponse), 403)]
-    public async Task<IActionResult> Update(int id, [FromBody] Order order)
+    public async Task<IActionResult> Update(int id, [FromBody] OrderUpdateDto orderDto)
     {
-        if (order == null || id != order.Id) return BadRequest(new ErrorResponse(400, "ID mismatch"));
-        await _orderService.UpdateAsync(order);
+        var existing = await _orderService.GetByIdAsync(id);
+        if (existing == null) return NotFound(new ErrorResponse(404, "Order not found"));
+
+        await _orderService.UpdateAsync(id, orderDto);
         return NoContent();
     }
 

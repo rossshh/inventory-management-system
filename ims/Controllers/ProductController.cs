@@ -1,4 +1,4 @@
-using ims.Models;
+using ims.DTO;
 using ims.Services.Interfaces;
 using ims.Helpers;
 using Microsoft.AspNetCore.Authorization;
@@ -28,7 +28,7 @@ public class ProductController : ControllerBase
     /// <response code="401">If the caller is not authenticated.</response>
     /// <response code="403">If the caller does not have Manager or Admin roles.</response>
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<Product>), 200)]
+    [ProducesResponseType(typeof(IEnumerable<ProductDto>), 200)]
     [ProducesResponseType(typeof(ErrorResponse), 401)]
     [ProducesResponseType(typeof(ErrorResponse), 403)]
     public async Task<IActionResult> GetAll()
@@ -47,7 +47,7 @@ public class ProductController : ControllerBase
     /// <response code="401">If the caller is not authenticated.</response>
     /// <response code="403">If the caller does not have Manager or Admin roles.</response>
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(Product), 200)]
+    [ProducesResponseType(typeof(ProductDto), 200)]
     [ProducesResponseType(typeof(ErrorResponse), 404)]
     [ProducesResponseType(typeof(ErrorResponse), 401)]
     [ProducesResponseType(typeof(ErrorResponse), 403)]
@@ -61,44 +61,44 @@ public class ProductController : ControllerBase
     /// <summary>
     /// Creates a new product (Manager/Admin only).
     /// </summary>
-    /// <param name="product">The details of the product to create.</param>
+    /// <param name="productDto">The details of the product to create.</param>
     /// <returns>The created product details.</returns>
     /// <response code="201">Returns the newly created product.</response>
     /// <response code="400">If the input data is invalid.</response>
     /// <response code="401">If the caller is not authenticated.</response>
     /// <response code="403">If the caller does not have Manager or Admin roles.</response>
     [HttpPost]
-    [ProducesResponseType(typeof(Product), 201)]
+    [ProducesResponseType(typeof(ProductDto), 201)]
     [ProducesResponseType(typeof(ErrorResponse), 400)]
     [ProducesResponseType(typeof(ErrorResponse), 401)]
     [ProducesResponseType(typeof(ErrorResponse), 403)]
-    public async Task<IActionResult> Create([FromBody] Product product)
+    public async Task<IActionResult> Create([FromBody] ProductCreateDto productDto)
     {
-        await _productService.AddAsync(product);
-        return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+        var createdProduct = await _productService.AddAsync(productDto);
+        return CreatedAtAction(nameof(GetById), new { id = createdProduct.Id }, createdProduct);
     }
 
     /// <summary>
     /// Updates an existing product's information (Manager/Admin only).
     /// </summary>
     /// <param name="id">The ID of the product to update.</param>
-    /// <param name="product">The updated product information.</param>
+    /// <param name="productDto">The updated product information.</param>
     /// <returns>No content on success.</returns>
     /// <response code="204">If the update was successful.</response>
-    /// <response code="400">If the ID in the URL does not match the ID in the body.</response>
     /// <response code="404">If the product is not found.</response>
     /// <response code="401">If the caller is not authenticated.</response>
     /// <response code="403">If the caller does not have Manager or Admin roles.</response>
     [HttpPut("{id}")]
     [ProducesResponseType(204)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
     [ProducesResponseType(typeof(ErrorResponse), 404)]
     [ProducesResponseType(typeof(ErrorResponse), 401)]
     [ProducesResponseType(typeof(ErrorResponse), 403)]
-    public async Task<IActionResult> Update(int id, [FromBody] Product product)
+    public async Task<IActionResult> Update(int id, [FromBody] ProductUpdateDto productDto)
     {
-        if (product == null || id != product.Id) return BadRequest(new ErrorResponse(400, "ID mismatch"));
-        await _productService.UpdateAsync(product);
+        var existing = await _productService.GetByIdAsync(id);
+        if (existing == null) return NotFound(new ErrorResponse(404, "Product not found"));
+        
+        await _productService.UpdateAsync(id, productDto);
         return NoContent();
     }
 

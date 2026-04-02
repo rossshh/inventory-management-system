@@ -1,3 +1,5 @@
+using AutoMapper;
+using ims.DTO;
 using ims.Models;
 using ims.Repository.Interfaces;
 using ims.Services.Interfaces;
@@ -9,15 +11,18 @@ namespace ims.Services;
 public class SupplierService : ISupplierService
 {
     private readonly ISupplierRepository _supplierRepository;
+    private readonly IMapper _mapper;
 
-    public SupplierService(ISupplierRepository supplierRepository)
+    public SupplierService(ISupplierRepository supplierRepository, IMapper mapper)
     {
         _supplierRepository = supplierRepository;
+        _mapper = mapper;
     }
-
-    public async Task AddAsync(Supplier supplier)
+    public async Task<SupplierDto> AddAsync(SupplierCreateDto supplierDto)
     {
+        var supplier = _mapper.Map<Supplier>(supplierDto);
         await _supplierRepository.AddAsync(supplier);
+        return _mapper.Map<SupplierDto>(supplier);
     }
 
     public async Task DeleteAsync(int id)
@@ -25,18 +30,24 @@ public class SupplierService : ISupplierService
         await _supplierRepository.DeleteAsync(id);
     }
 
-    public async Task<IEnumerable<Supplier>> GetAllAsync()
+    public async Task<IEnumerable<SupplierDto>> GetAllAsync()
     {
-        return await _supplierRepository.GetAllAsync();
+        var suppliers = await _supplierRepository.GetAllAsync();
+        return _mapper.Map<IEnumerable<SupplierDto>>(suppliers);
     }
 
-    public async Task<Supplier?> GetByIdAsync(int id)
+    public async Task<SupplierDto?> GetByIdAsync(int id)
     {
-        return await _supplierRepository.GetByIdAsync(id);
+        var supplier = await _supplierRepository.GetByIdAsync(id);
+        return _mapper.Map<SupplierDto?>(supplier);
     }
 
-    public async Task UpdateAsync(Supplier supplier)
+    public async Task UpdateAsync(int id, SupplierUpdateDto supplierDto)
     {
+        var supplier = await _supplierRepository.GetByIdAsync(id);
+        if (supplier == null) return;
+
+        _mapper.Map(supplierDto, supplier);
         await _supplierRepository.UpdateAsync(supplier);
     }
 }

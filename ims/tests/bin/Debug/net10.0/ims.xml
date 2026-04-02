@@ -44,25 +44,24 @@
             <response code="401">If the caller is not authenticated.</response>
             <response code="403">If the caller does not have the required role.</response>
         </member>
-        <member name="M:ims.Controllers.OrderController.Create(ims.Models.Order)">
+        <member name="M:ims.Controllers.OrderController.Create(ims.DTO.OrderCreateDto)">
             <summary>
             Creates a new order (Staff only).
             </summary>
-            <param name="order">The details of the order to create.</param>
+            <param name="orderDto">The details of the order to create.</param>
             <returns>The created order details.</returns>
             <response code="201">Returns the newly created order.</response>
             <response code="401">If the caller is not authenticated.</response>
             <response code="403">If the caller is not Staff.</response>
         </member>
-        <member name="M:ims.Controllers.OrderController.Update(System.Int32,ims.Models.Order)">
+        <member name="M:ims.Controllers.OrderController.Update(System.Int32,ims.DTO.OrderUpdateDto)">
             <summary>
             Updates an existing order (Manager/Admin only).
             </summary>
             <param name="id">The ID of the order to update.</param>
-            <param name="order">The updated order information.</param>
+            <param name="orderDto">The updated order information.</param>
             <returns>No content on success.</returns>
             <response code="204">If the update was successful.</response>
-            <response code="400">If the ID in the URL does not match the ID in the body.</response>
             <response code="404">If the order is not found.</response>
             <response code="401">If the caller is not authenticated.</response>
             <response code="403">If the caller does not have Manager or Admin roles.</response>
@@ -97,26 +96,25 @@
             <response code="401">If the caller is not authenticated.</response>
             <response code="403">If the caller does not have Manager or Admin roles.</response>
         </member>
-        <member name="M:ims.Controllers.ProductController.Create(ims.Models.Product)">
+        <member name="M:ims.Controllers.ProductController.Create(ims.DTO.ProductCreateDto)">
             <summary>
             Creates a new product (Manager/Admin only).
             </summary>
-            <param name="product">The details of the product to create.</param>
+            <param name="productDto">The details of the product to create.</param>
             <returns>The created product details.</returns>
             <response code="201">Returns the newly created product.</response>
             <response code="400">If the input data is invalid.</response>
             <response code="401">If the caller is not authenticated.</response>
             <response code="403">If the caller does not have Manager or Admin roles.</response>
         </member>
-        <member name="M:ims.Controllers.ProductController.Update(System.Int32,ims.Models.Product)">
+        <member name="M:ims.Controllers.ProductController.Update(System.Int32,ims.DTO.ProductUpdateDto)">
             <summary>
             Updates an existing product's information (Manager/Admin only).
             </summary>
             <param name="id">The ID of the product to update.</param>
-            <param name="product">The updated product information.</param>
+            <param name="productDto">The updated product information.</param>
             <returns>No content on success.</returns>
             <response code="204">If the update was successful.</response>
-            <response code="400">If the ID in the URL does not match the ID in the body.</response>
             <response code="404">If the product is not found.</response>
             <response code="401">If the caller is not authenticated.</response>
             <response code="403">If the caller does not have Manager or Admin roles.</response>
@@ -160,25 +158,24 @@
             <response code="401">If the caller is not authenticated.</response>
             <response code="403">If the caller does not have Manager or Admin roles.</response>
         </member>
-        <member name="M:ims.Controllers.SuppliersController.Create(ims.Models.Supplier)">
+        <member name="M:ims.Controllers.SuppliersController.Create(ims.DTO.SupplierCreateDto)">
             <summary>
             Creates a new supplier (Manager/Admin only).
             </summary>
-            <param name="supplier">The details of the supplier to create.</param>
+            <param name="supplierDto">The details of the supplier to create.</param>
             <returns>The created supplier details.</returns>
             <response code="201">Returns the newly created supplier.</response>
             <response code="401">If the caller is not authenticated.</response>
             <response code="403">If the caller does not have Manager or Admin roles.</response>
         </member>
-        <member name="M:ims.Controllers.SuppliersController.Update(System.Int32,ims.Models.Supplier)">
+        <member name="M:ims.Controllers.SuppliersController.Update(System.Int32,ims.DTO.SupplierUpdateDto)">
             <summary>
             Updates an existing supplier's information (Manager/Admin only).
             </summary>
             <param name="id">The ID of the supplier to update.</param>
-            <param name="supplier">The updated supplier information.</param>
+            <param name="supplierDto">The updated supplier information.</param>
             <returns>No content on success.</returns>
             <response code="204">If the update was successful.</response>
-            <response code="400">If the ID in the URL does not match the ID in the body.</response>
             <response code="404">If the supplier is not found.</response>
             <response code="401">If the caller is not authenticated.</response>
             <response code="403">If the caller does not have Manager or Admin roles.</response>
@@ -244,51 +241,6 @@
             <response code="401">If the caller is not authenticated.</response>
             <response code="403">If the caller is not an Admin.</response>
         </member>
-        <member name="T:ims.DTO.AuthResponseDto">
-            <summary>
-            Represents the response returned after a successful authentication.
-            </summary>
-        </member>
-        <member name="P:ims.DTO.AuthResponseDto.Token">
-            <summary>
-            The JWT bearer token to be used for subsequent authorized requests.
-            </summary>
-        </member>
-        <member name="P:ims.DTO.AuthResponseDto.ExpiresAt">
-            <summary>
-            The expiration date and time of the token.
-            </summary>
-        </member>
-        <member name="P:ims.DTO.AuthResponseDto.UserName">
-            <summary>
-            The username of the authenticated user.
-            </summary>
-        </member>
-        <member name="P:ims.DTO.AuthResponseDto.Role">
-            <summary>
-            The role assigned to the user.
-            </summary>
-        </member>
-        <member name="T:ims.DTO.UserDto">
-            <summary>
-            A data transfer object representing a user's safe profile information.
-            </summary>
-        </member>
-        <member name="P:ims.DTO.UserDto.Id">
-            <summary>
-            The unique identifier for the user.
-            </summary>
-        </member>
-        <member name="P:ims.DTO.UserDto.UserName">
-            <summary>
-            The user's login name.
-            </summary>
-        </member>
-        <member name="P:ims.DTO.UserDto.Role">
-            <summary>
-            The role assigned to the user (Admin, Manager, Staff).
-            </summary>
-        </member>
         <member name="T:ims.Helpers.ErrorResponse">
             <summary>
             A standardized error response returned by the API when something goes wrong.
@@ -317,16 +269,16 @@
             <param name="message">A descriptive error message.</param>
             <param name="errors">Optional details or validation errors.</param>
         </member>
-        <member name="T:ims.Migrations.InitialCreate">
+        <member name="T:ims.Migrations.InitialSqlServerCreate">
             <inheritdoc />
         </member>
-        <member name="M:ims.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+        <member name="M:ims.Migrations.InitialSqlServerCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
             <inheritdoc />
         </member>
-        <member name="M:ims.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+        <member name="M:ims.Migrations.InitialSqlServerCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
             <inheritdoc />
         </member>
-        <member name="M:ims.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+        <member name="M:ims.Migrations.InitialSqlServerCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
         <member name="T:ims.Models.Order">

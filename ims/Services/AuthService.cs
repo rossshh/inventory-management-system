@@ -1,3 +1,4 @@
+using AutoMapper;
 using ims.DTO;
 using ims.Helpers;
 using ims.Models;
@@ -19,16 +20,18 @@ public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
     private readonly JwtSettings _jwtSettings;
+    private readonly IMapper _mapper;
     private readonly PasswordHasher<User> _passwordHasher;
 
-    public AuthService(IUserRepository userRepository, IOptions<JwtSettings> jwtSettings)
+    public AuthService(IUserRepository userRepository, IOptions<JwtSettings> jwtSettings, IMapper mapper)
     {
         _userRepository = userRepository;
         _jwtSettings = jwtSettings.Value;
+        _mapper = mapper;
         _passwordHasher = new PasswordHasher<User>();
     }
 
-    public async Task<AuthResponseDto> AuthenticateAsync(LoginDto login)
+    public async Task<AuthResponseDto?> AuthenticateAsync(LoginDto login)
     {
         var user = await _userRepository.GetByUserNameAsync(login.UserName);
 
@@ -39,39 +42,25 @@ public class AuthService : IAuthService
         if (verifyResult == PasswordVerificationResult.Failed)
             return null;
 
-        var token = GenerateJwtToken(user);
+        var response = _mapper.Map<AuthResponseDto>(user);
+        response.Token = GenerateJwtToken(user);
+        response.ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes);
 
-        return new AuthResponseDto
-        {
-            Token = token,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
-            UserName = user.UserName,
-            Role = user.Role.ToString()
-        };
+        return response;
     }
 
-    public async Task<UserDto> RegisterAsync(RegisterDto registerDto)
+    public async Task<UserDto?> RegisterAsync(RegisterDto registerDto)
     {
         var exists = await _userRepository.ExistsByUserNameAsync(registerDto.UserName);
         if (exists)
             return null;
 
-        var user = new User
-        {
-            UserName = registerDto.UserName,
-            Role = registerDto.Role
-        };
-
+        var user = _mapper.Map<User>(registerDto);
         user.PasswordHash = _passwordHasher.HashPassword(user, registerDto.Password);
 
         await _userRepository.AddAsync(user);
 
-        return new UserDto
-        {
-            Id = user.Id,
-            UserName = user.UserName,
-            Role = user.Role
-        };
+        return _mapper.Map<UserDto>(user);
     }
 
     public async Task SeedDefaultAdminAsync()

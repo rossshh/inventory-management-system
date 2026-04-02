@@ -13,10 +13,12 @@ using ims.Middleware;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Reflection;
+using ims.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
@@ -34,7 +36,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 
-builder.Services.AddDbContext<AppDbContext>(op => op.UseSqlite(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddDbContext<AppDbContext>(op => op.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 

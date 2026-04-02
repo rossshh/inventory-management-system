@@ -27,7 +27,7 @@ public class ControllerTests
     public async Task ProductController_GetById_ReturnsOk_WhenProductExists()
     {
         // Arrange
-        var product = new Product { Id = 1, Name = "Laptop" };
+        var product = new ProductDto { Id = 1, Name = "Laptop" };
         _productServiceMock.Setup(s => s.GetByIdAsync(1)).ReturnsAsync(product);
         var controller = new ProductController(_productServiceMock.Object);
 
@@ -36,7 +36,7 @@ public class ControllerTests
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-        var returnedProduct = Assert.IsType<Product>(okResult.Value);
+        var returnedProduct = Assert.IsType<ProductDto>(okResult.Value);
         Assert.Equal("Laptop", returnedProduct.Name);
     }
 
@@ -44,7 +44,7 @@ public class ControllerTests
     public async Task ProductController_GetById_ReturnsNotFound_WhenProductMissing()
     {
         // Arrange
-        _productServiceMock.Setup(s => s.GetByIdAsync(99)).ReturnsAsync((Product)null!);
+        _productServiceMock.Setup(s => s.GetByIdAsync(99)).ReturnsAsync((ProductDto)null!);
         var controller = new ProductController(_productServiceMock.Object);
 
         // Act

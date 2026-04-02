@@ -1,3 +1,5 @@
+using AutoMapper;
+using ims.DTO;
 using ims.Models;
 using ims.Repository.Interfaces;
 using ims.Services.Interfaces;
@@ -9,15 +11,19 @@ namespace ims.Services;
 public class ProductService : IProductService
 {
     private readonly IProductRepository _productRepository;
+    private readonly IMapper _mapper;
 
-    public ProductService(IProductRepository productRepository)
+    public ProductService(IProductRepository productRepository, IMapper mapper)
     {
         _productRepository = productRepository;
+        _mapper = mapper;
     }
 
-    public async Task AddAsync(Product product)
+    public async Task<ProductDto> AddAsync(ProductCreateDto productDto)
     {
+        var product = _mapper.Map<Product>(productDto);
         await _productRepository.AddAsync(product);
+        return _mapper.Map<ProductDto>(product);
     }
 
     public async Task DeleteAsync(int id)
@@ -25,18 +31,24 @@ public class ProductService : IProductService
         await _productRepository.DeleteAsync(id);
     }
 
-    public async Task<IEnumerable<Product>> GetAllAsync()
+    public async Task<IEnumerable<ProductDto>> GetAllAsync()
     {
-        return await _productRepository.GetAllAsync();
+        var products = await _productRepository.GetAllAsync();
+        return _mapper.Map<IEnumerable<ProductDto>>(products);
     }
 
-    public async Task<Product> GetByIdAsync(int id)
+    public async Task<ProductDto?> GetByIdAsync(int id)
     {
-        return await _productRepository.GetByIdAsync(id);
+        var product = await _productRepository.GetByIdAsync(id);
+        return _mapper.Map<ProductDto?>(product);
     }
 
-    public async Task UpdateAsync(Product product)
+    public async Task UpdateAsync(int id, ProductUpdateDto productDto)
     {
+        var product = await _productRepository.GetByIdAsync(id);
+        if (product == null) return;
+
+        _mapper.Map(productDto, product);
         await _productRepository.UpdateAsync(product);
     }
 }

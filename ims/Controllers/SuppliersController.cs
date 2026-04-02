@@ -1,4 +1,4 @@
-using ims.Models;
+using ims.DTO;
 using ims.Services.Interfaces;
 using ims.Helpers;
 using Microsoft.AspNetCore.Authorization;
@@ -29,7 +29,7 @@ public class SuppliersController : ControllerBase
     /// <response code="403">If the caller does not have Manager or Admin roles.</response>
     [HttpGet]
     [Authorize(Roles = "Manager,Admin")]
-    [ProducesResponseType(typeof(IEnumerable<Supplier>), 200)]
+    [ProducesResponseType(typeof(IEnumerable<SupplierDto>), 200)]
     [ProducesResponseType(typeof(ErrorResponse), 401)]
     [ProducesResponseType(typeof(ErrorResponse), 403)]
     public async Task<IActionResult> GetAll()
@@ -49,7 +49,7 @@ public class SuppliersController : ControllerBase
     /// <response code="403">If the caller does not have Manager or Admin roles.</response>
     [HttpGet("{id}")]
     [Authorize(Roles = "Manager,Admin")]
-    [ProducesResponseType(typeof(Supplier), 200)]
+    [ProducesResponseType(typeof(SupplierDto), 200)]
     [ProducesResponseType(typeof(ErrorResponse), 404)]
     [ProducesResponseType(typeof(ErrorResponse), 401)]
     [ProducesResponseType(typeof(ErrorResponse), 403)]
@@ -63,42 +63,42 @@ public class SuppliersController : ControllerBase
     /// <summary>
     /// Creates a new supplier (Manager/Admin only).
     /// </summary>
-    /// <param name="supplier">The details of the supplier to create.</param>
+    /// <param name="supplierDto">The details of the supplier to create.</param>
     /// <returns>The created supplier details.</returns>
     /// <response code="201">Returns the newly created supplier.</response>
     /// <response code="401">If the caller is not authenticated.</response>
     /// <response code="403">If the caller does not have Manager or Admin roles.</response>
     [HttpPost]
-    [ProducesResponseType(typeof(Supplier), 201)]
+    [ProducesResponseType(typeof(SupplierDto), 201)]
     [ProducesResponseType(typeof(ErrorResponse), 401)]
     [ProducesResponseType(typeof(ErrorResponse), 403)]
-    public async Task<IActionResult> Create([FromBody] Supplier supplier)
+    public async Task<IActionResult> Create([FromBody] SupplierCreateDto supplierDto)
     {
-        await _supplierService.AddAsync(supplier);
-        return CreatedAtAction(nameof(GetById), new { id = supplier.Id }, supplier);
+        var createdSupplier = await _supplierService.AddAsync(supplierDto);
+        return CreatedAtAction(nameof(GetById), new { id = createdSupplier.Id }, createdSupplier);
     }
 
     /// <summary>
     /// Updates an existing supplier's information (Manager/Admin only).
     /// </summary>
     /// <param name="id">The ID of the supplier to update.</param>
-    /// <param name="supplier">The updated supplier information.</param>
+    /// <param name="supplierDto">The updated supplier information.</param>
     /// <returns>No content on success.</returns>
     /// <response code="204">If the update was successful.</response>
-    /// <response code="400">If the ID in the URL does not match the ID in the body.</response>
     /// <response code="404">If the supplier is not found.</response>
     /// <response code="401">If the caller is not authenticated.</response>
     /// <response code="403">If the caller does not have Manager or Admin roles.</response>
     [HttpPut("{id}")]
     [ProducesResponseType(204)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
     [ProducesResponseType(typeof(ErrorResponse), 404)]
     [ProducesResponseType(typeof(ErrorResponse), 401)]
     [ProducesResponseType(typeof(ErrorResponse), 403)]
-    public async Task<IActionResult> Update(int id, [FromBody] Supplier supplier)
+    public async Task<IActionResult> Update(int id, [FromBody] SupplierUpdateDto supplierDto)
     {
-        if (supplier == null || id != supplier.Id) return BadRequest(new ErrorResponse(400, "ID mismatch"));
-        await _supplierService.UpdateAsync(supplier);
+        var existing = await _supplierService.GetByIdAsync(id);
+        if (existing == null) return NotFound(new ErrorResponse(404, "Supplier not found"));
+
+        await _supplierService.UpdateAsync(id, supplierDto);
         return NoContent();
     }
 

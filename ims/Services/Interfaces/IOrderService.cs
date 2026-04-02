@@ -1,5 +1,4 @@
 using ims.DTO;
-using ims.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -7,10 +6,10 @@ namespace ims.Services.Interfaces;
 
 public interface IOrderService
 {
-    Task<IEnumerable<Order>> GetAllAsync();
-    Task<Order> GetByIdAsync(int id);
-    Task AddAsync(Order order);
-    Task UpdateAsync(Order order);
+    Task<IEnumerable<OrderDto>> GetAllAsync();
+    Task<OrderDto?> GetByIdAsync(int id);
+    Task<OrderDto> AddAsync(OrderCreateDto orderDto);
+    Task UpdateAsync(int id, OrderUpdateDto orderDto);
     Task DeleteAsync(int id);
     Task<IEnumerable<SupplierOrderReportDto>> GetSupplierOrderReportAsync();
 }

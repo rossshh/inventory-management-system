@@ -7,6 +7,10 @@ using Microsoft.Extensions.Options;
 using Moq;
 using System.Threading.Tasks;
 using Xunit;
+using AutoMapper;
+using ims.Mapping;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ims.Tests;
 
@@ -16,6 +20,7 @@ public class ServiceTests
     private readonly Mock<IOrderRepository> _orderRepoMock;
     private readonly Mock<IProductRepository> _productRepoMock;
     private readonly IOptions<JwtSettings> _jwtOptions;
+    private readonly IMapper _mapper;
 
     public ServiceTests()
     {
@@ -30,6 +35,12 @@ public class ServiceTests
             ExpiryMinutes = 60
         };
         _jwtOptions = Options.Create(settings);
+
+        var config = new MapperConfiguration(cfg =>
+        {
+            cfg.AddProfile<MappingProfile>();
+        });
+        _mapper = config.CreateMapper();
     }
 
     [Fact]
@@ -42,8 +53,8 @@ public class ServiceTests
         user.PasswordHash = hasher.HashPassword(user, password);
 
         _userRepoMock.Setup(r => r.GetByUserNameAsync("testuser")).ReturnsAsync(user);
-        
-        var authService = new AuthService(_userRepoMock.Object, _jwtOptions);
+
+        var authService = new AuthService(_userRepoMock.Object, _jwtOptions, _mapper);
         var loginDto = new LoginDto { UserName = "testuser", Password = password };
 
         // Act
@@ -60,7 +71,7 @@ public class ServiceTests
     {
         // Arrange
         _userRepoMock.Setup(r => r.ExistsByUserNameAsync("newuser")).ReturnsAsync(false);
-        var authService = new AuthService(_userRepoMock.Object, _jwtOptions);
+        var authService = new AuthService(_userRepoMock.Object, _jwtOptions, _mapper);
         var registerDto = new RegisterDto { UserName = "newuser", Password = "Password123!", Role = UserRole.Staff };
 
         // Act
@@ -77,7 +88,7 @@ public class ServiceTests
     {
         // Arrange
         _userRepoMock.Setup(r => r.ExistsByUserNameAsync("existinguser")).ReturnsAsync(true);
-        var authService = new AuthService(_userRepoMock.Object, _jwtOptions);
+        var authService = new AuthService(_userRepoMock.Object, _jwtOptions, _mapper);
         var registerDto = new RegisterDto { UserName = "existinguser", Password = "Password123!" };
 
         // Act
@@ -94,8 +105,8 @@ public class ServiceTests
         // Arrange
         var user = new User { UserName = "testuser", PasswordHash = "somehash" };
         _userRepoMock.Setup(r => r.GetByUserNameAsync("testuser")).ReturnsAsync(user);
-        
-        var authService = new AuthService(_userRepoMock.Object, _jwtOptions);
+
+        var authService = new AuthService(_userRepoMock.Object, _jwtOptions, _mapper);
         var loginDto = new LoginDto { UserName = "testuser", Password = "WrongPassword" };
 
         // Act
@@ -111,8 +122,8 @@ public class ServiceTests
         // Arrange
         var user = new User { Id = 1, UserName = "testuser", PasswordHash = "secret-hash", Role = UserRole.Admin };
         _userRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(user);
-        
-        var userService = new UserService(_userRepoMock.Object);
+
+        var userService = new UserService(_userRepoMock.Object, _mapper);
 
         // Act
         var result = await userService.GetByIdAsync(1);
@@ -121,7 +132,6 @@ public class ServiceTests
         Assert.NotNull(result);
         Assert.Equal(1, result.Id);
         Assert.Equal("testuser", result.UserName);
-        // The DTO doesn't even have PasswordHash, so this is verified by the return type
     }
 
     [Fact]
@@ -130,18 +140,18 @@ public class ServiceTests
         // Arrange
         var mockReport = new List<SupplierOrderReportDto>
         {
-            new SupplierOrderReportDto { Supplier = "Supplier A", TotalQuantity = 10, TotalValue = 500.0m }
+            new SupplierOrderReportDto { SupplierName = "Supplier A", TotalQuantity = 10, TotalValue = 500.0m }
         };
         _orderRepoMock.Setup(r => r.GetSupplierOrderReportAsync()).ReturnsAsync(mockReport);
-        
-        var orderService = new OrderService(_orderRepoMock.Object, _productRepoMock.Object);
+
+        var orderService = new OrderService(_orderRepoMock.Object, _mapper);
 
         // Act
         var result = await orderService.GetSupplierOrderReportAsync();
 
         // Assert
-        Assert.Single(result);
-        Assert.Equal("Supplier A", result.First().Supplier);
-        Assert.Equal(500.0m, result.First().TotalValue);
+        var report = Assert.Single(result);
+        Assert.Equal("Supplier A", report.SupplierName);
+        Assert.Equal(500.0m, report.TotalValue);
     }
 }
