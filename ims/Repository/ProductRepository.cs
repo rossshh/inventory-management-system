@@ -47,4 +47,9 @@ public class ProductRepository : IProductRepository
         _context.Products.Update(product);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<IEnumerable<Product>> GetLowStockProductsAsync(int threshold)
+    {
+        return await _context.Products.FromSqlRaw("EXEC GetLowStockProducts @Threshold = {0}", threshold).ToListAsync();
+    }
 }

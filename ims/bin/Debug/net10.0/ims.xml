@@ -138,6 +138,16 @@
             <response code="401">If the caller is not authenticated.</response>
             <response code="403">If the caller does not have Manager or Admin roles.</response>
         </member>
+        <member name="M:ims.Controllers.ReportsController.GetLowStockProducts(System.Int32)">
+            <summary>
+            Generates a report of low stock products (Manager/Admin only).
+            </summary>
+            <param name="threshold">The quantity threshold to consider a product as low stock.</param>
+            <returns>A list of low stock products.</returns>
+            <response code="200">Returns the low stock products.</response>
+            <response code="401">If the caller is not authenticated.</response>
+            <response code="403">If the caller does not have Manager or Admin roles.</response>
+        </member>
         <member name="M:ims.Controllers.SuppliersController.GetAll">
             <summary>
             Retrieves all suppliers (Manager/Admin only).
@@ -279,6 +289,18 @@
             <inheritdoc />
         </member>
         <member name="M:ims.Migrations.InitialSqlServerCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:ims.Migrations.AddStoredProcedures">
+            <inheritdoc />
+        </member>
+        <member name="M:ims.Migrations.AddStoredProcedures.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:ims.Migrations.AddStoredProcedures.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:ims.Migrations.AddStoredProcedures.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
         <member name="T:ims.Models.Order">

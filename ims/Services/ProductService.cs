@@ -51,4 +51,10 @@ public class ProductService : IProductService
         _mapper.Map(productDto, product);
         await _productRepository.UpdateAsync(product);
     }
+
+    public async Task<IEnumerable<ProductDto>> GetLowStockProductsAsync(int threshold)
+    {
+        var products = await _productRepository.GetLowStockProductsAsync(threshold);
+        return _mapper.Map<IEnumerable<ProductDto>>(products);
+    }
 }

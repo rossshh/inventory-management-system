@@ -11,4 +11,5 @@ public interface IProductService
     Task<ProductDto> AddAsync(ProductCreateDto productDto);
     Task UpdateAsync(int id, ProductUpdateDto productDto);
     Task DeleteAsync(int id);
+    Task<IEnumerable<ProductDto>> GetLowStockProductsAsync(int threshold);
 }
